@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-sans);
+  --color-background: #F8FAFC;
+  --color-foreground: #0F172A;
+  --color-primary: #0F172A;
+  --color-primary-foreground: #FFFFFF;
+  --color-accent: #10B981;
+  --color-accent-dark: #059669;
+  --color-finance-blue: #1D4ED8;
+  --color-muted: #F1F5F9;
+  --color-muted-foreground: #64748B;
+  --color-border: #E2E8F0;
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-none;
+  }
+  html {
+    @apply scroll-smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-accent/10 selection:text-accent;
+    font-feature-settings: "cv02", "cv03", "cv04", "ss01";
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight text-primary;
+  }
+  p {
+    @apply leading-relaxed text-muted-foreground;
+  }
+}
+
+/* Custom Utilities */
+.shadow-soft {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+}
+
+.shadow-premium {
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.03), 0 8px 10px -6px rgb(0 0 0 / 0.03);
+}
+
+input[type="range"] {
+  @apply appearance-none bg-transparent cursor-pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  @apply bg-slate-200 h-1.5 rounded-full;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  @apply appearance-none bg-accent border-[3px] border-white h-5 w-5 rounded-full -mt-[7px] shadow-sm transition-all active:scale-110;
+}
