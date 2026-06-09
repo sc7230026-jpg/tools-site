@@ -121,10 +121,7 @@ export default function Home() {
 
           {/* Hero header — tool identity above the fold */}
           <div className="mb-12 max-w-3xl">
-            <div className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-primary text-[10px] font-black uppercase tracking-wider shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-accent animate-pulse" aria-hidden="true" />
-              Free Tool — No Sign-Up Required
-            </div>
+
 
             <h1
               id="hero-heading"
