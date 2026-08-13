@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>401(k) Retirement Calculator | Advanced Financial Forecasting</title>
+    <meta name="description" content="Estimate your retirement savings, employer match contributions, investment growth, and future retirement income with advanced projections.">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="401(k) Retirement Calculator | Premium Financial Tool">
+    <meta property="og:description" content="Calculate your future 401(k) balance, factor in inflation and salary growth, and see your retirement readiness score.">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free 401(k) Retirement Calculator">
+    <meta name="twitter:description" content="Estimate your retirement savings and growth in seconds.">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0f172a',
+                        accent: '#10B981',
+                        finance: '#2563eb',
+                        surface: '#ffffff',
+                        background: '#f8fafc'
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,0.03) 0, transparent 50%), 
+                              radial-gradient(at 50% 0%, hsla(225,39%,30%,0.03) 0, transparent 50%), 
+                              radial-gradient(at 100% 0%, hsla(339,49%,30%,0.03) 0, transparent 50%);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            transition: all 0.2s;
+            font-weight: 500;
+            color: #0f172a;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #10B981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            background-color: #ffffff;
+        }
+
+        .metric-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.08);
+        }
+
+        /* Custom Scrollbar for tables */
+        .table-container::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+
+    <!-- Schema Markup -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Premium 401(k) Retirement Calculator",
+      "applicationCategory": "FinanceApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+</head>
+<body class="text-primary antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-card border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="trending-up" class="w-8 h-8 text-accent"></i>
+                    <span class="font-black text-xl tracking-tight">FinCalc<span class="text-accent">.</span></span>
+                </div>
+                <div class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+                    <a href="#" class="hover:text-accent transition-colors">Calculators</a>
+                    <a href="#education" class="hover:text-accent transition-colors">Resources</a>
+                    <a href="#faq" class="hover:text-accent transition-colors">FAQ</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SECTION 1: HERO -->
+    <section class="pt-32 pb-16 px-4 relative overflow-hidden">
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-accent text-xs font-bold uppercase tracking-widest mb-6">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                </span>
+                Free Tool — No Sign-Up Required
+            </div>
+            <h1 class="text-5xl md:text-6xl font-black tracking-tight mb-6 leading-tight">
+                401(k) Retirement <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-finance">Calculator</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-500 font-medium mb-10 leading-relaxed max-w-2xl mx-auto">
+                Estimate your retirement savings, employer match contributions, investment growth, and future retirement income with advanced projections.
+            </p>
+            
+            <div class="flex flex-wrap justify-center gap-4 text-sm font-semibold text-slate-600">
+                <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-100">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-accent"></i> Updated Limits
+                </div>
+                <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-100">
+                    <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> Instant Results
+                </div>
+                <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-100">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-finance"></i> Advanced Forecasting
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN APP WRAPPER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- SECTION 2: CALCULATOR FORM (LEFT COLUMN) -->
+            <div class="lg:col-span-4 glass-card rounded-2xl p-6 lg:sticky lg:top-24 shadow-sm border border-slate-200">
+                <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    <i data-lucide="settings-2" class="w-5 h-5 text-accent"></i> Parameters
+                </h2>
+                
+                <form id="calcForm" class="space-y-6">
+                    <!-- Personal Info -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400 border-b pb-2">Personal Information</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label for="currentAge">Current Age</label>
+                                <input type="number" id="currentAge" value="30" min="18" max="80">
+                            </div>
+                            <div class="input-group">
+                                <label for="retireAge">Retirement Age</label>
+                                <input type="number" id="retireAge" value="65" min="50" max="90">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Income Info -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400 border-b pb-2">Income & Savings</h3>
+                        <div class="input-group">
+                            <label for="salary">Current Annual Salary ($)</label>
+                            <input type="number" id="salary" value="80000" min="0" step="1000">
+                        </div>
+                        <div class="input-group">
+                            <label for="currentBalance">Current 401(k) Balance ($)</label>
+                            <input type="number" id="currentBalance" value="25000" min="0" step="1000">
+                        </div>
+                    </div>
+
+                    <!-- Contributions -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400 border-b pb-2">Contributions</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label for="empContrib">Your Contrib (%)</label>
+                                <input type="number" id="empContrib" value="8" min="0" max="100" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label for="salaryGrowth">Annual Salary Growth (%)</label>
+                                <input type="number" id="salaryGrowth" value="2" min="0" max="15" step="0.5">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label for="matchPct">Employer Match (%)</label>
+                                <input type="number" id="matchPct" value="50" min="0" max="200" step="1">
+                            </div>
+                            <div class="input-group">
+                                <label for="matchLimit">Match Limit (% of salary)</label>
+                                <input type="number" id="matchLimit" value="6" min="0" max="100" step="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assumptions -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400 border-b pb-2">Market Assumptions</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label for="annualReturn">Expected Return (%)</label>
+                                <input type="number" id="annualReturn" value="7" min="1" max="15" step="0.5">
+                            </div>
+                            <div class="input-group">
+                                <label for="inflation">Inflation Rate (%)</label>
+                                <input type="number" id="inflation" value="2.5" min="0" max="10" step="0.1">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label for="withdrawalRate">Retirement Withdrawal Rate (%)</label>
+                                <input type="number" id="withdrawalRate" value="4" min="1" max="10" step="0.5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 flex gap-3">
+                        <button type="button" id="btnCalculate" class="flex-1 bg-primary text-white font-bold py-3 px-4 rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
+                            Calculate Now
+                        </button>
+                        <button type="button" id="btnReset" class="px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors">
+                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- RIGHT COLUMN: RESULTS -->
+            <div class="lg:col-span-8 space-y-8">
+                
+                <!-- SECTION 3: RESULTS DASHBOARD -->
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <div class="metric-card bg-primary text-white rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-20">
+                            <i data-lucide="wallet" class="w-16 h-16"></i>
+                        </div>
+                        <p class="text-slate-300 text-sm font-semibold mb-1">Estimated Balance</p>
+                        <h3 class="text-4xl font-black mb-2" id="resTotalBalance">$0</h3>
+                        <p class="text-xs text-emerald-400 font-bold" id="resAdjustedBalance">Adjusted for inflation: $0</p>
+                    </div>
+
+                    <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                            </div>
+                            <p class="text-slate-500 text-sm font-semibold">Monthly Income</p>
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-800" id="resMonthlyIncome">$0</h3>
+                        <p class="text-xs text-slate-400 font-medium mt-1">Based on <span id="lblWithdrawal">4%</span> rule</p>
+                    </div>
+
+                    <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                            </div>
+                            <p class="text-slate-500 text-sm font-semibold">Total Investment Gain</p>
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-800" id="resTotalGain">$0</h3>
+                        <p class="text-xs text-slate-400 font-medium mt-1">Power of compound interest</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-semibold mb-1">Total You Contributed</p>
+                            <h3 class="text-xl font-black text-slate-800" id="resTotalEmpContrib">$0</h3>
+                        </div>
+                        <div class="text-slate-200"><i data-lucide="user" class="w-8 h-8"></i></div>
+                    </div>
+                    <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-semibold mb-1">Total Employer Match</p>
+                            <h3 class="text-xl font-black text-slate-800" id="resTotalMatch">$0</h3>
+                        </div>
+                        <div class="text-slate-200"><i data-lucide="building-2" class="w-8 h-8"></i></div>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: AI INSIGHTS PANEL -->
+                <div class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-indigo-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i> AI Insights & Analysis
+                    </h3>
+                    <ul class="space-y-3" id="insightsList">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+
+                <!-- SECTION 5: INTERACTIVE CHARTS -->
+                <div class="glass-card border border-slate-200 rounded-2xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold">Portfolio Growth Projection</h3>
+                        <select id="chartType" class="text-sm border-slate-200 rounded-lg bg-slate-50 py-1.5 px-3 font-semibold text-slate-600 outline-none focus:border-accent">
+                            <option value="balance">Total Balance</option>
+                            <option value="breakdown">Contribution vs Gain</option>
+                        </select>
+                    </div>
+                    <div class="relative h-80 w-full">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- SECTION 7: SCENARIO COMPARISON -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">What-If Scenarios</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="scenarioContainer">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- SECTION 6: YEAR BY YEAR TABLE -->
+                <div class="glass-card border border-slate-200 rounded-2xl overflow-hidden flex flex-col max-h-[500px]">
+                    <div class="p-6 border-b border-slate-100 bg-white z-10">
+                        <h3 class="text-lg font-bold">Year-by-Year Breakdown</h3>
+                    </div>
+                    <div class="overflow-x-auto overflow-y-auto table-container flex-1 bg-white">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-500 uppercase bg-slate-50 sticky top-0 shadow-sm z-10">
+                                <tr>
+                                    <th class="px-6 py-3 font-bold whitespace-nowrap">Age</th>
+                                    <th class="px-6 py-3 font-bold whitespace-nowrap">Salary</th>
+                                    <th class="px-6 py-3 font-bold whitespace-nowrap">Your Contrib</th>
+                                    <th class="px-6 py-3 font-bold whitespace-nowrap">Employer Match</th>
+                                    <th class="px-6 py-3 font-bold whitespace-nowrap">Investment Gain</th>
+                                    <th class="px-6 py-3 font-bold whitespace-nowrap text-right">Ending Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-slate-100">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- SECTION 8: EDUCATIONAL CONTENT -->
+    <article id="education" class="bg-white border-t border-slate-200 py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6">
+            <h2 class="text-3xl font-black mb-12 text-center">Mastering Your 401(k) Strategy</h2>
+            
+            <div class="prose prose-slate prose-lg max-w-none space-y-12">
+                <section>
+                    <h3 class="text-2xl font-bold mb-4">What Is a 401(k)?</h3>
+                    <p class="text-slate-600 leading-relaxed">A 401(k) is an employer-sponsored retirement savings plan that allows workers to save and invest a portion of their paycheck before taxes are taken out. Taxes aren't paid until the money is withdrawn from the account. It is one of the most powerful wealth-building tools available to employees due to its high contribution limits, tax advantages, and the potential for employer matching.</p>
+                </section>
+
+                <section>
+                    <h3 class="text-2xl font-bold mb-4">How a 401(k) Works</h3>
+                    <p class="text-slate-600 leading-relaxed mb-4">When you enroll in a 401(k), you decide what percentage of your salary you want to contribute. This money is automatically deducted from your paycheck and invested in a portfolio of mutual funds, index funds, or target-date funds of your choosing.</p>
+                    <p class="text-slate-600 leading-relaxed">The funds grow tax-deferred. You cannot withdraw the funds without a 10% penalty until you reach age 59½ (with some exceptions). In 2026, the maximum employee contribution is $23,500, with a $7,500 catch-up contribution allowed for those aged 50 and older.</p>
+                </section>
+
+                <section class="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
+                    <h3 class="text-xl font-bold mb-3 text-emerald-900">The Power of Employer Matching</h3>
+                    <p class="text-emerald-800 leading-relaxed">An employer match is essentially "free money." If an employer offers a 50% match on up to 6% of your salary, and you earn $100,000, contributing $6,000 will result in your employer adding another $3,000 to your account. <strong>Always contribute at least enough to capture the full match.</strong> Failing to do so is leaving part of your compensation on the table.</p>
+                </section>
+
+                <section>
+                    <h3 class="text-2xl font-bold mb-4">Traditional vs Roth 401(k)</h3>
+                    <p class="text-slate-600 leading-relaxed mb-4"><strong>Traditional 401(k):</strong> Contributions are made with pre-tax dollars, lowering your taxable income today. Your money grows tax-deferred, and you pay ordinary income tax on withdrawals in retirement.</p>
+                    <p class="text-slate-600 leading-relaxed"><strong>Roth 401(k):</strong> Contributions are made with after-tax dollars. You get no tax deduction today, but your money grows tax-free, and qualified withdrawals in retirement are 100% tax-free. Roth is often mathematically superior for young workers or those who expect to be in a higher tax bracket in retirement.</p>
+                </section>
+
+                <section>
+                    <h3 class="text-2xl font-bold mb-4">How Inflation Impacts Retirement Savings</h3>
+                    <p class="text-slate-600 leading-relaxed">Inflation erodes the purchasing power of money over time. Historically averaging around 2.5% to 3% annually, inflation means that $1,000,000 in 30 years will buy significantly less than $1,000,000 today. Our calculator specifically provides an "Inflation-Adjusted Balance" to show you the real future purchasing power of your savings in today's dollars.</p>
+                </section>
+            </div>
+        </div>
+    </article>
+
+    <!-- SECTION 9: FAQ -->
+    <section id="faq" class="bg-slate-50 border-t border-slate-200 py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6">
+            <h2 class="text-3xl font-black mb-4 text-center">Frequently Asked Questions</h2>
+            <p class="text-center text-slate-500 mb-12">Expert answers to the most common retirement planning questions.</p>
+            
+            <div class="space-y-4" id="faqContainer">
+                <!-- FAQs inserted via JS to keep HTML clean -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-slate-400 py-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
+            <div class="flex justify-center items-center gap-2 mb-6">
+                <i data-lucide="trending-up" class="w-6 h-6 text-accent"></i>
+                <span class="font-black text-lg text-white tracking-tight">FinCalc<span class="text-accent">.</span></span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-6 mb-8 text-xs font-bold uppercase tracking-widest">
+                <a href="#" class="hover:text-white transition-colors">Retirement Calculator</a>
+                <a href="#" class="hover:text-white transition-colors">Compound Interest Calculator</a>
+                <a href="#" class="hover:text-white transition-colors">Investment Calculator</a>
+                <a href="#" class="hover:text-white transition-colors">Inflation Calculator</a>
+            </div>
+            <p>© 2026 FinCalc Premium Tools. For educational purposes only. Not financial advice.</p>
+        </div>
+    </footer>
+
+    <!-- LOGIC & BEHAVIOR -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Constants & DOM Elements
+        const form = document.getElementById('calcForm');
+        const chartTypeSelect = document.getElementById('chartType');
+        let mainChartInstance = null;
+
+        const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+        const formatNumber = (val) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(val);
+
+        // Core Calculation Engine
+        function calculateRetirement() {
+            // Get inputs
+            const currentAge = parseInt(document.getElementById('currentAge').value);
+            const retireAge = parseInt(document.getElementById('retireAge').value);
+            const currentSalary = parseFloat(document.getElementById('salary').value);
+            const salaryGrowth = parseFloat(document.getElementById('salaryGrowth').value) / 100;
+            const currentBalance = parseFloat(document.getElementById('currentBalance').value);
+            const empContribPct = parseFloat(document.getElementById('empContrib').value) / 100;
+            const matchPct = parseFloat(document.getElementById('matchPct').value) / 100;
+            const matchLimitPct = parseFloat(document.getElementById('matchLimit').value) / 100;
+            const returnRate = parseFloat(document.getElementById('annualReturn').value) / 100;
+            const inflationRate = parseFloat(document.getElementById('inflation').value) / 100;
+            const withdrawalRate = parseFloat(document.getElementById('withdrawalRate').value) / 100;
+
+            const yearsToRetire = retireAge - currentAge;
+            if (yearsToRetire <= 0) return null;
+
+            let balance = currentBalance;
+            let salary = currentSalary;
+            
+            let totalEmpContrib = 0;
+            let totalMatch = 0;
+            let totalGain = 0;
+
+            const yearlyData = [];
+
+            // Starting state
+            yearlyData.push({
+                age: currentAge,
+                salary: salary,
+                empContrib: 0,
+                match: 0,
+                gain: 0,
+                balance: balance
+            });
+
+            for (let year = 1; year <= yearsToRetire; year++) {
+                // Beginning of year salary
+                if (year > 1) {
+                    salary = salary * (1 + salaryGrowth);
+                }
+
+                // Contributions (assumed evenly throughout year, simplified to end of year for basic math)
+                const yearlyEmpContrib = salary * empContribPct;
+                const matchBase = Math.min(empContribPct, matchLimitPct) * salary;
+                const yearlyMatch = matchBase * matchPct;
+
+                // Investment gain on existing balance (simple annual compounding)
+                const gain = balance * returnRate;
+                
+                // End of year state
+                balance = balance + gain + yearlyEmpContrib + yearlyMatch;
+                
+                totalEmpContrib += yearlyEmpContrib;
+                totalMatch += yearlyMatch;
+                totalGain += gain;
+
+                yearlyData.push({
+                    age: currentAge + year,
+                    salary: salary,
+                    empContrib: yearlyEmpContrib,
+                    match: yearlyMatch,
+                    gain: gain,
+                    balance: balance
+                });
+            }
+
+            const inflationAdjustedBalance = balance / Math.pow(1 + inflationRate, yearsToRetire);
+            const monthlyIncome = (balance * withdrawalRate) / 12;
+
+            return {
+                yearsToRetire,
+                finalBalance: balance,
+                inflationAdjustedBalance,
+                totalEmpContrib,
+                totalMatch,
+                totalGain,
+                monthlyIncome,
+                yearlyData,
+                inputs: { currentSalary, empContribPct, matchPct, returnRate }
+            };
+        }
+
+        // Render Dashboard Metrics
+        function updateDashboard(res) {
+            if (!res) return;
+            
+            // Counters with simple animation
+            document.getElementById('resTotalBalance').innerText = formatCurrency(res.finalBalance);
+            document.getElementById('resAdjustedBalance').innerText = \`Adjusted for inflation (Today's buying power): \${formatCurrency(res.inflationAdjustedBalance)}\`;
+            document.getElementById('resMonthlyIncome').innerText = formatCurrency(res.monthlyIncome);
+            document.getElementById('resTotalGain').innerText = formatCurrency(res.totalGain);
+            document.getElementById('resTotalEmpContrib').innerText = formatCurrency(res.totalEmpContrib);
+            document.getElementById('resTotalMatch').innerText = formatCurrency(res.totalMatch);
+            document.getElementById('lblWithdrawal').innerText = document.getElementById('withdrawalRate').value + '%';
+        }
+
+        // Render AI Insights
+        function updateInsights(res) {
+            const ul = document.getElementById('insightsList');
+            ul.innerHTML = '';
+            const insights = [];
+
+            // Insight 1: General track
+            if (res.finalBalance > 1000000) {
+                insights.push({ icon: 'check-circle-2', color: 'text-emerald-500', text: \`Excellent trajectory. You are projected to cross the millionaire milestone by age \${res.yearlyData.find(d => d.balance >= 1000000).age}.\`});
+            }
+
+            // Insight 2: Match capture
+            const matchLimit = parseFloat(document.getElementById('matchLimit').value) / 100;
+            if (res.inputs.empContribPct < matchLimit) {
+                insights.push({ icon: 'alert-triangle', color: 'text-amber-500', text: \`Warning: You are leaving free money on the table. Increase your contribution to at least \${matchLimit*100}% to capture your full employer match.\`});
+            } else {
+                insights.push({ icon: 'thumbs-up', color: 'text-emerald-500', text: \`Great job. You are maximizing your employer match, capturing 100% of the free money available to you.\`});
+            }
+
+            // Insight 3: Small increase impact
+            const extra1Pct = res.inputs.currentSalary * 0.01;
+            const extraFuture = extra1Pct * (Math.pow(1 + res.inputs.returnRate, res.yearsToRetire) - 1) / res.inputs.returnRate; // Rough estimate
+            insights.push({ icon: 'trending-up', color: 'text-indigo-500', text: \`If you increase your contribution by just 1%, you could add approximately \${formatCurrency(extraFuture)} to your final retirement balance.\`});
+
+            // Insight 4: Inflation
+            const purchasingPowerLost = res.finalBalance - res.inflationAdjustedBalance;
+            insights.push({ icon: 'info', color: 'text-slate-500', text: \`Due to inflation, your \${formatCurrency(res.finalBalance)} balance will feel like \${formatCurrency(res.inflationAdjustedBalance)} in today's money.\`});
+
+            insights.forEach(ins => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start gap-3 bg-white p-3 rounded-xl border border-indigo-50 shadow-sm text-sm font-medium text-slate-700';
+                li.innerHTML = \`<i data-lucide="\${ins.icon}" class="w-5 h-5 flex-shrink-0 \${ins.color} mt-0.5"></i> <span>\${ins.text}</span>\`;
+                ul.appendChild(li);
+            });
+            lucide.createIcons();
+        }
+
+        // Render Table
+        function updateTable(res) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            res.yearlyData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors';
+                tr.innerHTML = \`
+                    <td class="px-6 py-3 font-semibold">\${row.age}</td>
+                    <td class="px-6 py-3 text-slate-500">\${formatCurrency(row.salary)}</td>
+                    <td class="px-6 py-3 text-emerald-600 font-medium">\${formatCurrency(row.empContrib)}</td>
+                    <td class="px-6 py-3 text-blue-600 font-medium">\${formatCurrency(row.match)}</td>
+                    <td class="px-6 py-3 text-indigo-600 font-medium">\${formatCurrency(row.gain)}</td>
+                    <td class="px-6 py-3 font-bold text-right">\${formatCurrency(row.balance)}</td>
+                \`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render Charts
+        function updateChart(res) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            
+            if (mainChartInstance) {
+                mainChartInstance.destroy();
+            }
+
+            const type = chartTypeSelect.value;
+            const labels = res.yearlyData.map(d => \`Age \${d.age}\`);
+
+            if (type === 'balance') {
+                mainChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Balance',
+                            data: res.yearlyData.map(d => d.balance),
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: getChartOptions()
+                });
+            } else {
+                // Area chart showing accumulation
+                let accEmp = 0, accMatch = 0, accGain = 0;
+                const empData = [], matchData = [], gainData = [];
+                
+                res.yearlyData.forEach(d => {
+                    accEmp += d.empContrib;
+                    accMatch += d.match;
+                    accGain += d.gain;
+                    empData.push(accEmp);
+                    matchData.push(accMatch);
+                    gainData.push(accGain);
+                });
+
+                mainChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Your Contributions',
+                                data: empData,
+                                backgroundColor: '#0f172a',
+                                stacked: true
+                            },
+                            {
+                                label: 'Employer Match',
+                                data: matchData,
+                                backgroundColor: '#3b82f6',
+                                stacked: true
+                            },
+                            {
+                                label: 'Investment Gains',
+                                data: gainData,
+                                backgroundColor: '#10B981',
+                                stacked: true
+                            }
+                        ]
+                    },
+                    options: {
+                        ...getChartOptions(),
+                        scales: {
+                            x: { stacked: true, grid: { display: false } },
+                            y: { stacked: true, beginAtZero: true, border: {display: false} }
+                        }
+                    }
+                });
+            }
+        }
+
+        function getChartOptions() {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: {family: 'Inter', weight: 'bold'} } },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleFont: {family: 'Inter', size: 13},
+                        bodyFont: {family: 'Inter', size: 13},
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        beginAtZero: true, 
+                        border: {display: false},
+                        ticks: {
+                            callback: function(value) {
+                                if(value >= 1000000) return '$' + (value/1000000).toFixed(1) + 'M';
+                                if(value >= 1000) return '$' + (value/1000).toFixed(0) + 'k';
+                                return '$' + value;
+                            }
+                        }
+                    }
+                },
+                interaction: { mode: 'nearest', axis: 'x', intersect: false }
+            };
+        }
+
+        // Generate Scenarios
+        function updateScenarios(baseRes) {
+            const container = document.getElementById('scenarioContainer');
+            container.innerHTML = '';
+            
+            // Deep copy base inputs by reading DOM again
+            const getVal = (id) => parseFloat(document.getElementById(id).value);
+            
+            const scenarios = [
+                { name: "+2% Contribution", modify: () => document.getElementById('empContrib').value = getVal('empContrib') + 2, reset: () => document.getElementById('empContrib').value = getVal('empContrib') - 2, icon: 'arrow-up-circle', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                { name: "Retire 5 Yrs Later", modify: () => document.getElementById('retireAge').value = getVal('retireAge') + 5, reset: () => document.getElementById('retireAge').value = getVal('retireAge') - 5, icon: 'clock', color: 'text-blue-500', bg: 'bg-blue-50' },
+                { name: "+2% Annual Return", modify: () => document.getElementById('annualReturn').value = getVal('annualReturn') + 2, reset: () => document.getElementById('annualReturn').value = getVal('annualReturn') - 2, icon: 'trending-up', color: 'text-indigo-500', bg: 'bg-indigo-50' }
+            ];
+
+            scenarios.forEach(sc => {
+                // apply scenario
+                sc.modify();
+                const simRes = calculateRetirement();
+                // revert
+                sc.reset();
+
+                const diff = simRes.finalBalance - baseRes.finalBalance;
+                
+                container.innerHTML += \`
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="\${sc.bg} p-2 rounded-lg \${sc.color}"><i data-lucide="\${sc.icon}" class="w-4 h-4"></i></div>
+                            <h4 class="font-bold text-sm">\${sc.name}</h4>
+                        </div>
+                        <p class="text-2xl font-black mb-1">\${formatCurrency(simRes.finalBalance)}</p>
+                        <p class="text-xs font-bold text-emerald-500">+\${formatCurrency(diff)} vs current</p>
+                    </div>
+                \`;
+            });
+            lucide.createIcons();
+        }
+
+        // Master App Update
+        function updateApp() {
+            const res = calculateRetirement();
+            if (!res) return;
+            updateDashboard(res);
+            updateInsights(res);
+            updateTable(res);
+            updateChart(res);
+            updateScenarios(res);
+        }
+
+        // Setup FAQ Data
+        function setupFAQ() {
+            const faqs = [
+                { q: "What is a good 401(k) balance by age?", a: "Fidelity generally recommends having 1x your salary saved by 30, 3x by 40, 6x by 50, and 10x by 67. However, this varies vastly based on your lifestyle and expected expenses." },
+                { q: "How much should I contribute?", a: "At an absolute minimum, contribute enough to get your full employer match. Ideal targets are typically 10% to 15% of your gross income, including the employer match." },
+                { q: "How does employer matching work?", a: "Employers contribute money to your account based on your contributions. A common structure is a 50% match up to 6% of your salary. If you earn $100k and contribute 6% ($6,000), they add $3,000." },
+                { q: "What annual return should I assume?", a: "Historically, the stock market has returned about 10% annually before inflation, or roughly 7% after inflation. Using 6% to 7% is a prudent assumption for long-term forecasting." },
+                { q: "What is the difference between Roth and Traditional 401(k)?", a: "Traditional contributions are pre-tax (taxes paid on withdrawal). Roth contributions are post-tax (qualified withdrawals are entirely tax-free). Choose based on your current vs expected future tax bracket." },
+                { q: "When can I withdraw without a penalty?", a: "Standard withdrawals without the 10% early withdrawal penalty can begin at age 59½. There is also a 'Rule of 55' if you leave your job in the year you turn 55 or older." },
+                { q: "What happens to my 401(k) if I leave my job?", a: "The money is yours. You can leave it there (usually if >$5k), roll it over into an IRA, or roll it into your new employer's 401(k). Avoid cashing it out to prevent taxes and penalties." },
+                { q: "Can I borrow from my 401(k)?", a: "Many plans allow loans up to 50% of your vested balance or $50,000, whichever is less. You pay interest back to yourself, but if you leave your job, the loan may become due immediately." },
+                { q: "What are Required Minimum Distributions (RMDs)?", a: "The IRS requires you to start withdrawing a minimum amount from your Traditional 401(k) starting at age 73 (as of recent SECURE Act changes) so they can tax it." },
+                { q: "Should I invest in a Target Date Fund?", a: "Target Date Funds automatically adjust your asset allocation from aggressive to conservative as you approach retirement. They are excellent, hands-off options for the average investor." },
+                { q: "What are 401(k) fees?", a: "Fees include administrative costs and expense ratios on the mutual funds you select. High fees (over 1%) can severely drag down your long-term returns. Look for low-cost index funds." },
+                { q: "What is vesting?", a: "Vesting is ownership of employer match contributions. Some employers use a 'cliff' (e.g., 0% yours until 3 years, then 100%) or 'graded' (20% per year) vesting schedule." },
+                { q: "What is the catch-up contribution?", a: "For 2026, the IRS allows employees aged 50 and over to contribute an additional $7,500 above the standard $23,500 limit to help them catch up on savings." },
+                { q: "Does inflation affect my retirement?", a: "Yes, drastically. 3% annual inflation means costs double roughly every 24 years. Your investments must outpace inflation to maintain your purchasing power." },
+                { q: "Is a 4% withdrawal rate safe?", a: "The 4% rule (withdrawing 4% in year one, adjusted for inflation thereafter) is a historical benchmark for a 30-year retirement. Some modern advisors suggest 3.3% to 3.5% to be safer." }
+            ];
+
+            const container = document.getElementById('faqContainer');
+            faqs.forEach(f => {
+                container.innerHTML += \`
+                    <details class="group bg-white border border-slate-200 rounded-xl overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                        <summary class="flex items-center justify-between p-6 font-bold cursor-pointer hover:bg-slate-50 transition-colors">
+                            \${f.q}
+                            <span class="transition group-open:rotate-180">
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400"></i>
+                            </span>
+                        </summary>
+                        <div class="px-6 pb-6 text-slate-600 leading-relaxed border-t border-slate-100 pt-4">
+                            \${f.a}
+                        </div>
+                    </details>
+                \`;
+            });
+
+            // Inject Schema
+            const schema = {
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": faqs.map(f => ({
+                    "@type": "Question",
+                    "name": f.q,
+                    "acceptedAnswer": { "@type": "Answer", "text": f.a }
+                }))
+            };
+            const script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.text = JSON.stringify(schema);
+            document.head.appendChild(script);
+        }
+
+        // Event Listeners
+        document.querySelectorAll('#calcForm input').forEach(input => {
+            input.addEventListener('input', updateApp);
+        });
+        chartTypeSelect.addEventListener('change', () => updateChart(calculateRetirement()));
+        
+        document.getElementById('btnCalculate').addEventListener('click', () => {
+            updateApp();
+            document.getElementById('resTotalBalance').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        document.getElementById('btnReset').addEventListener('click', () => {
+            form.reset();
+            updateApp();
+        });
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            setupFAQ();
+            updateApp();
+        });
+    </script>
+</body>
+</html>

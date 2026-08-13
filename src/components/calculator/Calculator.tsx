@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   XAxis,
   YAxis,
@@ -40,12 +40,12 @@ function SliderField({
   tooltip,
 }: {
   label: string;
-  value: number;
+  value: number | string;
   displayValue: string;
   min: number;
   max: number;
   step: number;
-  onChange: (v: number) => void;
+  onChange: (v: number | string) => void;
   tooltip?: string;
 }) {
   return (
@@ -69,7 +69,10 @@ function SliderField({
         max={max}
         step={step}
         value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
+        onChange={(e) => {
+          const val = e.target.value;
+          onChange(val === "" ? "" : Number(val));
+        }}
         className="w-full"
         aria-label={label}
       />
@@ -94,8 +97,8 @@ function NumberField({
   tooltip,
 }: {
   label: string;
-  value: number;
-  onChange: (v: number) => void;
+  value: number | string;
+  onChange: (v: number | string) => void;
   min?: number;
   max?: number;
   step?: number;
@@ -120,7 +123,10 @@ function NumberField({
           min={min}
           max={max}
           step={step ?? 1}
-          onChange={(e) => onChange(Number(e.target.value))}
+          onChange={(e) => {
+            const val = e.target.value;
+            onChange(val === "" ? "" : Number(val));
+          }}
           className={cn(
             "w-full h-12 rounded-xl border border-slate-200 bg-slate-50 font-bold text-primary text-base",
             "focus:border-accent focus:bg-white focus:outline-none transition-all",
@@ -184,20 +190,174 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
   );
 }
 
+/* ─── Memoized Chart Panel (isolated from raw input re-renders) ─── */
+const ChartPanel = React.memo(function ChartPanel({
+  data,
+  isValid,
+  showTable,
+  setShowTable,
+}: {
+  data: Array<{ year: number; age: number; balance: number; contributions: number }>;
+  isValid: boolean;
+  showTable: boolean;
+  setShowTable: (v: boolean) => void;
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-soft">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="font-black text-primary text-base">Growth Trajectory</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Projected 401(k) balance over time
+          </p>
+        </div>
+        <button
+          onClick={() => setShowTable(!showTable)}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-xs font-bold text-primary"
+          title={showTable ? "View chart" : "View year-by-year table"}
+        >
+          {showTable ? (
+            <><BarChart3 className="h-4 w-4" /> Chart</>
+          ) : (
+            <><TableIcon className="h-4 w-4" /> Table</>
+          )}
+        </button>
+      </div>
+
+      {showTable ? (
+        <div className="h-[400px] overflow-auto rounded-xl border border-slate-100">
+          {!isValid ? (
+            <div className="flex items-center justify-center h-full p-6 text-center text-sm font-bold text-slate-400">
+              Please enter valid parameters to view the year-by-year breakdown.
+            </div>
+          ) : (
+            <BreakdownTable data={data} />
+          )}
+        </div>
+      ) : (
+        <>
+          {!isValid ? (
+            <div className="flex items-center justify-center h-[300px] border border-dashed border-slate-200 rounded-xl text-sm font-bold text-slate-400">
+              Retirement age must be greater than current age to view projections.
+            </div>
+          ) : (
+            <>
+              <div className="w-full" style={{ height: 300, minHeight: 300 }}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                    <defs>
+                      <linearGradient id="gradBalance" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%"  stopColor="#10B981" stopOpacity={0.18} />
+                        <stop offset="95%" stopColor="#10B981" stopOpacity={0}    />
+                      </linearGradient>
+                      <linearGradient id="gradContrib" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%"  stopColor="#1D4ED8" stopOpacity={0.10} />
+                        <stop offset="95%" stopColor="#1D4ED8" stopOpacity={0}    />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis
+                      dataKey="age"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 11, fill: "#94a3b8", fontWeight: 700 }}
+                      dy={10}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 11, fill: "#94a3b8", fontWeight: 700 }}
+                      tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                      width={52}
+                    />
+                    <Tooltip content={<ChartTooltip />} />
+                    <Area
+                      type="monotone"
+                      dataKey="balance"
+                      stroke="#10B981"
+                      strokeWidth={2.5}
+                      fill="url(#gradBalance)"
+                      isAnimationActive={false}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="contributions"
+                      stroke="#1D4ED8"
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      fill="url(#gradContrib)"
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Legend */}
+              <div className="flex items-center gap-6 mt-4 pt-4 border-t border-slate-100">
+                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+                  <span className="w-3 h-3 rounded-full bg-accent" />
+                  Total Balance
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+                  <span className="w-4 h-0.5 bg-finance-blue" style={{ borderTop: "2px dashed #1D4ED8" }} />
+                  Total Contributions
+                </div>
+              </div>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+});
+
 /* ─── Main Component ───────────────────────────────────── */
 export function Calculator() {
-  const [currentAge,        setCurrentAge]        = useState(30);
-  const [retirementAge,     setRetirementAge]     = useState(65);
-  const [currentSavings,    setCurrentSavings]    = useState(25000);
-  const [monthlyContrib,    setMonthlyContrib]    = useState(800);
-  const [annualSalary,      setAnnualSalary]      = useState(95000);
-  const [employerMatch,     setEmployerMatch]     = useState(50);
-  const [employerMatchLimit,setEmployerMatchLimit]= useState(6);
-  const [expectedReturn,    setExpectedReturn]    = useState(7);
-  const [inflationRate,     setInflationRate]     = useState(2.5);
-  const [salaryIncrease,    setSalaryIncrease]    = useState(3);
+  const [currentAge,        setCurrentAge]        = useState<number | string>(30);
+  const [retirementAge,     setRetirementAge]     = useState<number | string>(65);
+  const [currentSavings,    setCurrentSavings]    = useState<number | string>(25000);
+  const [monthlyContrib,    setMonthlyContrib]    = useState<number | string>(800);
+  const [annualSalary,      setAnnualSalary]      = useState<number | string>(95000);
+  const [employerMatch,     setEmployerMatch]     = useState<number | string>(50);
+  const [employerMatchLimit,setEmployerMatchLimit]= useState<number | string>(6);
+  const [expectedReturn,    setExpectedReturn]    = useState<number | string>(7);
+  const [inflationRate,     setInflationRate]     = useState<number | string>(2.5);
+  const [salaryIncrease,    setSalaryIncrease]    = useState<number | string>(3);
   const [isRoth,            setIsRoth]            = useState(false);
   const [showTable,         setShowTable]         = useState(false);
+
+  // Debounced state to completely isolate heavy calculations from rapid UI typing
+  const [calcValues, setCalcValues] = useState({
+    currentAge: 30, retirementAge: 65, currentSavings: 25000, 
+    monthlyContrib: 800, annualSalary: 95000, employerMatch: 50,
+    employerMatchLimit: 6, expectedReturn: 7, inflationRate: 2.5, salaryIncrease: 3
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const parse = (val: string | number, fallback: number) => {
+        if (val === "") return fallback;
+        const num = Number(val);
+        return Number.isFinite(num) && !Number.isNaN(num) ? num : fallback;
+      };
+      // Clamp ages at the barrier — never allow unsafe values into the engine
+      const MAX_AGE = 120;
+      const MIN_AGE = 0;
+      setCalcValues({
+        currentAge:        Math.min(Math.max(MIN_AGE, parse(currentAge, 30)), MAX_AGE),
+        retirementAge:     Math.min(Math.max(MIN_AGE, parse(retirementAge, 65)), MAX_AGE),
+        currentSavings:    parse(currentSavings, 0),
+        monthlyContrib:    parse(monthlyContrib, 0),
+        annualSalary:      parse(annualSalary, 0),
+        employerMatch:     parse(employerMatch, 0),
+        employerMatchLimit:parse(employerMatchLimit, 0),
+        expectedReturn:    parse(expectedReturn, 7),
+        inflationRate:     parse(inflationRate, 2.5),
+        salaryIncrease:    parse(salaryIncrease, 3)
+      });
+    }, 300); // 300ms calculation barrier
+    return () => clearTimeout(timer);
+  }, [currentAge, retirementAge, currentSavings, monthlyContrib, annualSalary,
+      employerMatch, employerMatchLimit, expectedReturn, inflationRate, salaryIncrease]);
 
   const fmt = useCallback(
     (val: number) =>
@@ -206,45 +366,111 @@ export function Calculator() {
   );
 
   const results = useMemo(() => {
-    const years = Math.max(0, retirementAge - currentAge);
-    const data: Array<{ year: number; age: number; balance: number; contributions: number }> = [];
-    let balance = currentSavings;
-    let totalContributed = currentSavings;
-    let salary = annualSalary;
+    // 1. Safe numeric parsing & finite validation from debounced state
+    const { 
+      currentAge, retirementAge, currentSavings, monthlyContrib, annualSalary, 
+      employerMatch, employerMatchLimit, expectedReturn, inflationRate, salaryIncrease 
+    } = calcValues;
 
-    for (let i = 0; i <= years; i++) {
-      const yearEmployeeCont = monthlyContrib * 12;
-      const matchLimit       = salary * (employerMatchLimit / 100);
-      const yearEmployerCont = Math.min(yearEmployeeCont, matchLimit) * (employerMatch / 100);
-      const totalYearCont    = yearEmployeeCont + yearEmployerCont;
+    const getSafeNumber = (val: any, min: number = 0, fallback: number = 0) => {
+      const num = Number(val);
+      if (typeof num !== "number" || !Number.isFinite(num) || Number.isNaN(num)) return fallback;
+      return Math.max(min, num);
+    };
 
-      data.push({
-        year: i,
-        age: currentAge + i,
-        balance: Math.round(balance),
-        contributions: Math.round(totalContributed),
-      });
+    const safeCurrentAge = getSafeNumber(currentAge, 0, 30);
+    const safeRetirementAge = getSafeNumber(retirementAge, 0, 65);
+    const safeCurrentSavings = getSafeNumber(currentSavings, 0, 0);
+    const safeMonthlyContrib = getSafeNumber(monthlyContrib, 0, 0);
+    const safeAnnualSalary = getSafeNumber(annualSalary, 0, 0);
+    const safeEmployerMatch = getSafeNumber(employerMatch, 0, 0);
+    const safeEmployerMatchLimit = getSafeNumber(employerMatchLimit, 0, 0);
+    const safeExpectedReturn = getSafeNumber(expectedReturn, -100, 7); 
+    const safeInflationRate = getSafeNumber(inflationRate, -100, 2.5);
+    const safeSalaryIncrease = getSafeNumber(salaryIncrease, -100, 3);
 
-      balance          += totalYearCont + balance * (expectedReturn / 100);
-      totalContributed += totalYearCont;
-      salary           *= 1 + salaryIncrease / 100;
+    // Safe fallback state
+    const generateFallback = () => ({
+      data: [],
+      total: 0,
+      contributed: 0,
+      growth: 0,
+      inflationAdjusted: 0,
+      monthlyIncome: 0,
+      isValid: false,
+    });
+
+    // 2. Relationship validation
+    if (safeRetirementAge <= safeCurrentAge) {
+      return generateFallback();
     }
 
-    const inflFactor       = Math.pow(1 + inflationRate / 100, years);
-    const inflationAdjusted = balance / inflFactor;
+    // 3. Safe projection limit
+    let calculatedYears = safeRetirementAge - safeCurrentAge;
+    if (!Number.isFinite(calculatedYears) || calculatedYears < 0) {
+      return generateFallback();
+    }
 
+    const MAX_PROJECTION_YEARS = 100;
+    const safeYears = Math.min(calculatedYears, MAX_PROJECTION_YEARS);
+    
+    // 4. Bounded calculation with Finite-result validation
+    const data: Array<{ year: number; age: number; balance: number; contributions: number }> = [];
+    let balance = safeCurrentSavings;
+    let totalContributed = safeCurrentSavings;
+    let salary = safeAnnualSalary;
+    
+    const MAX_SAFE_FINANCIAL = 1e15; // 1 quadrillion absolute cap to avoid Infinity logic
+
+    for (let i = 0; i <= safeYears; i++) {
+      // Ensure intermediate values stay finite and don't explode before calculating
+      if (!Number.isFinite(balance) || !Number.isFinite(totalContributed) || !Number.isFinite(salary)) {
+        break; // break loop safely if bounds exceeded somehow
+      }
+
+      const yearEmployeeCont = safeMonthlyContrib * 12;
+      const matchLimit = salary * (safeEmployerMatchLimit / 100);
+      const yearEmployerCont = Math.min(yearEmployeeCont, matchLimit) * (safeEmployerMatch / 100);
+      const totalYearCont = yearEmployeeCont + yearEmployerCont;
+
+      // 5. Build bounded, validated chart data
+      data.push({
+        year: i,
+        age: safeCurrentAge + i,
+        balance: Math.min(Math.max(0, Math.round(balance)), MAX_SAFE_FINANCIAL),
+        contributions: Math.min(Math.max(0, Math.round(totalContributed)), MAX_SAFE_FINANCIAL),
+      });
+
+      // Advance one year
+      balance += totalYearCont + balance * (safeExpectedReturn / 100);
+      totalContributed += totalYearCont;
+      salary *= 1 + safeSalaryIncrease / 100;
+
+      // Cap at arbitrary large number to prevent Infinity during massive inputs
+      balance = Math.min(balance, MAX_SAFE_FINANCIAL);
+      totalContributed = Math.min(totalContributed, MAX_SAFE_FINANCIAL);
+      salary = Math.min(salary, MAX_SAFE_FINANCIAL);
+    }
+
+    // 6. Final chart array constraint check
+    if (!Array.isArray(data) || data.length > MAX_PROJECTION_YEARS + 1) {
+       return generateFallback();
+    }
+
+    const inflFactor = Math.pow(1 + safeInflationRate / 100, safeYears);
+    const inflationAdjusted = (Number.isFinite(inflFactor) && inflFactor > 0) ? balance / inflFactor : balance;
+
+    // Double check final values are finite before returning
     return {
       data,
-      total: balance,
-      contributed: totalContributed,
-      growth: balance - totalContributed,
-      inflationAdjusted,
-      monthlyIncome: (inflationAdjusted * 0.04) / 12,
+      total: Number.isFinite(balance) ? balance : 0,
+      contributed: Number.isFinite(totalContributed) ? totalContributed : 0,
+      growth: Number.isFinite(balance) && Number.isFinite(totalContributed) ? Math.max(0, balance - totalContributed) : 0,
+      inflationAdjusted: Number.isFinite(inflationAdjusted) ? Math.min(inflationAdjusted, MAX_SAFE_FINANCIAL) : 0,
+      monthlyIncome: Number.isFinite(inflationAdjusted) ? Math.min((inflationAdjusted * 0.04) / 12, MAX_SAFE_FINANCIAL) : 0,
+      isValid: true,
     };
-  }, [currentAge, retirementAge, currentSavings, monthlyContrib, annualSalary,
-      employerMatch, employerMatchLimit, expectedReturn, inflationRate, salaryIncrease]);
-
-  const yearsToRetire = retirementAge - currentAge;
+  }, [calcValues]);
 
   return (
     <div className="space-y-8" id="calculator-tool">
@@ -262,7 +488,7 @@ export function Calculator() {
         <div className="flex flex-col sm:items-end gap-1">
           <div className="flex items-center gap-2 text-sm font-bold text-accent">
             <TrendingUp className="h-4 w-4" aria-hidden="true" />
-            <span>In {yearsToRetire} year{yearsToRetire !== 1 ? "s" : ""} · Age {retirementAge}</span>
+            <span>In {Math.max(0, calcValues.retirementAge - calcValues.currentAge)} years · Age {calcValues.retirementAge}</span>
           </div>
           <p className="text-xs text-white/40 font-medium">
             {isRoth ? "Roth 401(k) — Tax-Free Withdrawals" : "Traditional 401(k) — Pre-Tax Contributions"}
@@ -276,7 +502,6 @@ export function Calculator() {
         {/* ─── LEFT: Inputs ─── */}
         <aside className="lg:col-span-5 space-y-6" aria-label="Calculator inputs">
 
-          {/* Account type toggle */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5 shadow-soft">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-black uppercase tracking-widest text-primary">Account Type</h2>
@@ -310,7 +535,6 @@ export function Calculator() {
             </p>
           </div>
 
-          {/* Personal details */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5 shadow-soft">
             <h2 className="text-sm font-black uppercase tracking-widest text-primary flex items-center gap-2">
               <Calendar className="h-4 w-4 text-accent" aria-hidden="true" />
@@ -332,7 +556,7 @@ export function Calculator() {
             <SliderField
               label="Current Savings"
               value={currentSavings}
-              displayValue={fmt(currentSavings)}
+              displayValue={fmt(Number(currentSavings) || 0)}
               min={0}
               max={500000}
               step={1000}
@@ -342,7 +566,7 @@ export function Calculator() {
             <SliderField
               label="Monthly Contribution"
               value={monthlyContrib}
-              displayValue={fmt(monthlyContrib)}
+              displayValue={fmt(Number(monthlyContrib) || 0)}
               min={0}
               max={5000}
               step={50}
@@ -351,7 +575,6 @@ export function Calculator() {
             />
           </div>
 
-          {/* Employer match */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5 shadow-soft">
             <h2 className="text-sm font-black uppercase tracking-widest text-primary flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-accent" aria-hidden="true" />
@@ -380,14 +603,13 @@ export function Calculator() {
             <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-xs font-bold text-accent">
               ✓ Your employer adds{" "}
               {fmt(
-                Math.min(monthlyContrib * 12, annualSalary * (employerMatchLimit / 100)) *
-                  (employerMatch / 100)
+                Math.min(Number(monthlyContrib) * 12, Number(annualSalary) * (Number(employerMatchLimit) / 100)) *
+                  (Number(employerMatch) / 100)
               )}{" "}
               / year in free matching contributions.
             </div>
           </div>
 
-          {/* Growth assumptions */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5 shadow-soft">
             <h2 className="text-sm font-black uppercase tracking-widest text-primary flex items-center gap-2">
               <Percent className="h-4 w-4 text-accent" aria-hidden="true" />
@@ -425,7 +647,6 @@ export function Calculator() {
             />
           </div>
 
-          {/* Reset */}
           <button
             onClick={() => {
               setCurrentAge(30); setRetirementAge(65); setCurrentSavings(25000);
@@ -443,7 +664,6 @@ export function Calculator() {
         {/* ─── RIGHT: Results ─── */}
         <div className="lg:col-span-7 space-y-6">
 
-          {/* Stat cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <StatCard label="Total Balance"      value={fmt(results.total)}           />
             <StatCard label="In Today's Dollars" value={fmt(results.inflationAdjusted)} />
@@ -451,7 +671,6 @@ export function Calculator() {
             <StatCard label="Compound Growth"    value={fmt(results.growth)}  accent  />
           </div>
 
-          {/* Monthly income highlight */}
           <div className="bg-white rounded-2xl border border-slate-200 px-6 py-5 shadow-soft flex items-center justify-between gap-4">
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
@@ -470,95 +689,12 @@ export function Calculator() {
             </div>
           </div>
 
-          {/* Growth Chart */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-soft">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="font-black text-primary text-base">Growth Trajectory</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  How your balance compounds from age {currentAge} to {retirementAge}
-                </p>
-              </div>
-              <button
-                onClick={() => setShowTable(!showTable)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-xs font-bold text-primary"
-                title={showTable ? "View chart" : "View year-by-year table"}
-              >
-                {showTable ? (
-                  <><BarChart3 className="h-4 w-4" /> Chart</>
-                ) : (
-                  <><TableIcon className="h-4 w-4" /> Table</>
-                )}
-              </button>
-            </div>
-
-            {showTable ? (
-              <div className="h-[400px] overflow-auto rounded-xl border border-slate-100">
-                <BreakdownTable data={results.data} />
-              </div>
-            ) : (
-              <>
-                <div className="w-full" style={{ height: 300, minHeight: 300 }}>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={results.data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                      <defs>
-                        <linearGradient id="gradBalance" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%"  stopColor="#10B981" stopOpacity={0.18} />
-                          <stop offset="95%" stopColor="#10B981" stopOpacity={0}    />
-                        </linearGradient>
-                        <linearGradient id="gradContrib" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%"  stopColor="#1D4ED8" stopOpacity={0.10} />
-                          <stop offset="95%" stopColor="#1D4ED8" stopOpacity={0}    />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis
-                        dataKey="age"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 11, fill: "#94a3b8", fontWeight: 700 }}
-                        dy={10}
-                      />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 11, fill: "#94a3b8", fontWeight: 700 }}
-                        tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
-                        width={52}
-                      />
-                      <Tooltip content={<ChartTooltip />} />
-                      <Area
-                        type="monotone"
-                        dataKey="balance"
-                        stroke="#10B981"
-                        strokeWidth={2.5}
-                        fill="url(#gradBalance)"
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="contributions"
-                        stroke="#1D4ED8"
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        fill="url(#gradContrib)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-                {/* Legend */}
-                <div className="flex items-center gap-6 mt-4 pt-4 border-t border-slate-100">
-                  <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                    <span className="w-3 h-3 rounded-full bg-accent" />
-                    Total Balance
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                    <span className="w-4 h-0.5 bg-finance-blue" style={{ borderTop: "2px dashed #1D4ED8" }} />
-                    Total Contributions
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          <ChartPanel
+            data={results.data}
+            isValid={results.isValid}
+            showTable={showTable}
+            setShowTable={setShowTable}
+          />
         </div>
       </div>
     </div>
